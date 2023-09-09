@@ -8,7 +8,7 @@ _This has only been tested on a P1P as that's the only printer I have_
 
 _For this to work, you need to be on the same network as your printer_
 
-0. *Install .NET 6 if you do not have it installed already*
+0. *Install .NET 6 if you do not have it installed already (https://dotnet.microsoft.com/en-us/download/dotnet/6.0 - ".NET Runtime" for your platform)*
 1. Clone the repo
 2. Open your terminal & `cd` into the repository folder
 3. Run `dotnet run`
