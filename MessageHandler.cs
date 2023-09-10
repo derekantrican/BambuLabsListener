@@ -15,96 +15,121 @@ namespace BambuLabsListener
             {
                 var payloadSegment = message.PayloadSegment;
                 string payloadString = Encoding.UTF8.GetString(payloadSegment.Array, payloadSegment.Offset, payloadSegment.Count);
-                // Console.WriteLine(payloadString);
 
                 var payloadObject = JsonSerializer.Deserialize<JsonNode>(payloadString);
 
                 if (payloadObject["print"] != null)
                 {
-                    HandlePrintMessage(payloadObject["print"]);
-                }
+                    if (Settings.Instance.ShowAllMessages)
+                    {
+                        Console.WriteLine(payloadString);
+                    }
 
-                if (payloadObject["info"] != null)
-                {
-                    HandleInfoMessage(payloadObject["info"]);
+                    HandlePrintMessage(payloadObject["print"]);
                 }
             }
 
             return Task.CompletedTask;
         }
 
-        private static PrintStatus currentPrint;
+        private static PrinterStatus printer = new PrinterStatus();
 
         private static void HandlePrintMessage(JsonNode json)
         {
-            //Has information about the state of the printer like temps, print progress, etc
+            //Here's where BambuStudio processes the "push_status" message: https://github.com/bambulab/BambuStudio/blob/5ef759ce41863f989da7b363f7c94e5edc5ade0d/src/slic3r/GUI/DeviceManager.cpp#L2740
 
-            //There also seems to be "mc_print_sub_stage" which seems interesting (might indicate whether we're printing, bed leveling, etc)
-            //There's some mappings for X1C on the HomeAssistant forums here: https://community.home-assistant.io/t/bambu-lab-x1-x1c-mqtt/489510/165
-            //Guesses as to what the values might be (from testing):
-            //0: idle
-            //1: homing print head? not sure. something about print head movement, I think
-            //2: bed preheating?
-            //3: auto bed leveling?
-            //Note that the values flip back & forth a lot. Like bed leveling could be happening (3) but messages for 2 & 1 could happen when the print head moves
-
-            //There's also "mc_print_stage" which values might be something like idle (0), heating (1), running gcode (2) or something
-
-            string command = json["command"].GetValue<string>();
-            string gcodeState = json["gcode_state"] != null ? json["gcode_state"].GetValue<string>() : null;
-            int subStage = json["mc_print_sub_stage"] != null ? json["mc_print_sub_stage"].GetValue<int>() : 0;
-
-            if (command == "project_file")
+            if (json["command"] != null)
             {
-                currentPrint = new PrintStatus
+                string command = json["command"].GetValue<string>();
+                if (command == "project_file")
                 {
-                    Name = json["subtask_name"].GetValue<string>() //Todo: this is the print name, but it would be nice if we could use the model name
-                };
+                    printer.PrintName = json["subtask_name"].GetValue<string>(); //Todo: this is the print/project name, but it would be nice if we could use the model name
+
+                    printer.Stopwatch.Restart();
+                    Helpers.EchoMessage($"'{printer.PrintName}' has started printing", ConsoleColor.Green, true);
+                }
             }
 
-            if (json["layer_num"] != null && json["layer_num"].GetValue<int>() == 1) //Triggering off layer 1 will give us the model print time - excluding bed leveling & other prep
+            if (json["gcode_state"] != null)
             {
-                if (!currentPrint.Stopwatch.IsRunning)
+                Helpers.SetIfDifferent(ref printer.Status, json["gcode_state"].GetValue<string>(), state =>
                 {
-                    WriteToConsoleWithColor($"{currentPrint.Name} has started printing", ConsoleColor.Green);
-                    SendDiscordMessage($"{currentPrint.Name} has started printing");
+                    if (state == "FINISH" && printer.Stopwatch.IsRunning)
+                    {
+                        printer.Stopwatch.Stop();
+                        Helpers.EchoMessage($"'{printer.PrintName}' finished printing in {printer.Stopwatch.Elapsed.Format()}", ConsoleColor.Green, true);
+                    }
+                });
+            }
 
-                    currentPrint.Stopwatch.Start();
-                }
+            if (json["stg_cur"] != null)
+            {
+                Helpers.SetIfDifferent(ref printer.PrintStage, json["stg_cur"].GetValue<int>(), stage =>
+                {
+                    string stageMessage = PrinterStatus.InterpretStage(stage);
+                    if (!string.IsNullOrEmpty(stageMessage))
+                    {
+                        Helpers.EchoMessage($"Stage: {stageMessage} (elapsed: {printer.Stopwatch.Elapsed.Format()})", ConsoleColor.Cyan);
+                    }
+
+                    if (stage == 5 /*M400 pause*/ || stage == 16 /*user pause*/)
+                    {
+                        printer.Stopwatch.Stop(); //Todo: need to test this and figure out when we should resume the Stopwatch
+                        Helpers.EchoMessage($"'{printer.PrintName}' is paused", ConsoleColor.Gray, true);
+                    }
+                });
             }
 
             if (json["layer_num"] != null)
             {
-                WriteToConsoleWithColor($"LAYER: {json["layer_num"].GetValue<int>()}", ConsoleColor.Yellow);
+                Helpers.SetIfDifferent(ref printer.LayerNum, json["layer_num"].GetValue<int>(), layer =>
+                {
+                    Helpers.EchoMessage($"LAYER: {layer}", ConsoleColor.Yellow);
+                });
             }
 
             if (json["mc_percent"] != null)
             {
-                currentPrint.ProgressPercentage = json["mc_percent"].GetValue<int>();
-                //Not currently doing anything with this, but we could report progress somewhere
+                Helpers.SetIfDifferent(ref printer.ProgressPercentage, json["mc_percent"].GetValue<int>());
             }
 
-            if (gcodeState == "FINISH")
+            if (json["print_error"] != null && json["print_error"].GetValue<int>() != 0)
             {
-                if (currentPrint.Stopwatch.IsRunning) //It's possible for a "FINISH" event to happen at the beginning so this should prevent that
-                {
-                    WriteToConsoleWithColor($"{currentPrint.Name} finished printing in {currentPrint.Stopwatch.Elapsed.Format()}", ConsoleColor.Green);
-                    currentPrint.Stopwatch.Stop();
-                    SendDiscordMessage($"{currentPrint.Name} finished printing in {currentPrint.Stopwatch.Elapsed.Format()}");
-                }
+                //Todo: interpret print_error value
+
+                Helpers.EchoMessage($"'{printer.PrintName}' failed (elapsed: {printer.Stopwatch.Elapsed.Format()}, error: {json["print_error"].GetValue<int>()})", ConsoleColor.Red, true);
+            }
+        }
+    }
+
+    public static class Helpers
+    {
+        public static string Format(this TimeSpan timeSpan)
+        {
+            string result = $"{timeSpan:%m\\m\\ %s\\s}";
+            if (timeSpan.Hours > 0)
+            {
+                result = $"{timeSpan.Hours}h {result}";
             }
 
-            if ((gcodeState != null && gcodeState != "IDLE") || command != "push_status" || subStage > 0)
+            return result;
+        }
+
+        public static void SetIfDifferent<T>(ref T prop, T val, Action<T> afterSet = null)
+        {
+            if ((prop == null && val != null) || !prop.Equals(val))
             {
-                Console.WriteLine($"PRINT: {JsonSerializer.Serialize(json)}\n");
+                prop = val;
+                afterSet?.Invoke(val);
             }
         }
 
-        private static void HandleInfoMessage(JsonNode json)
+        public static void EchoMessage(string message, ConsoleColor color, bool alsoSendOnDiscord = false)
         {
-            if (json["command"] == null || json["command"].GetValue<string>() != "get_version")
+            WriteToConsoleWithColor(message, color);
+            if (alsoSendOnDiscord)
             {
-                Console.WriteLine($"INFO: {JsonSerializer.Serialize(json)}\n");
+                SendDiscordMessage(message);
             }
         }
 
@@ -129,20 +154,6 @@ namespace BambuLabsListener
             Console.ForegroundColor = color;
             Console.WriteLine(message);
             Console.ResetColor();
-        }
-    }
-
-    public static class ExtensionMethods
-    {
-        public static string Format(this TimeSpan timeSpan)
-        {
-            string result = $"{timeSpan:%m\\m\\ %s\\s}";
-            if (timeSpan.Hours > 0)
-            {
-                result = $"{timeSpan.Hours}h {result}";
-            }
-
-            return result;
         }
     }
 }

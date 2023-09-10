@@ -11,6 +11,7 @@ namespace BambuLabsListener
         public string SerialNumber { get; set; }
         public string AccessCode { get; set; }
         public string DiscordWebhook { get; set; }
+        public bool ShowAllMessages { get; set; }
 
         public static void Read(string file)
         {
