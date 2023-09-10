@@ -6,7 +6,7 @@ _This has only been tested on a P1P as that's the only printer I have. If you ha
 
 ## Demo
 
-//Insert demo video
+https://github.com/derekantrican/BambuLabsListener/assets/1558019/c08882ff-e89c-4caa-8848-8a92f62c486e
 
 ## Cross-plat compatibility
 
