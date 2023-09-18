@@ -45,7 +45,6 @@ namespace BambuLabsListener
                 {
                     printer.PrintName = json["subtask_name"].GetValue<string>(); //Todo: this is the print/project name, but it would be nice if we could use the model name
 
-                    printer.Stopwatch.Restart();
                     Helpers.EchoMessage($"'{printer.PrintName}' has started printing", ConsoleColor.Green, true);
                 }
             }
@@ -85,6 +84,13 @@ namespace BambuLabsListener
                 Helpers.SetIfDifferent(ref printer.LayerNum, json["layer_num"].GetValue<int>(), layer =>
                 {
                     Helpers.EchoMessage($"LAYER: {layer}", ConsoleColor.Yellow);
+
+                    if (layer == 0)
+                    {
+                        //Only start the stopwatch when the "layer_num: 0" message is sent. Otherwise, it seems that a "gcode_state: FINISH" can be sent AFTER
+                        //the project_file command is sent (presumably, leftover from the previous print)
+                        printer.Stopwatch.Restart();
+                    }
                 });
             }
 
