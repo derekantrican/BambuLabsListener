@@ -96,7 +96,8 @@ namespace BambuLabsListener
 
             if (json["mc_remaining_time"] != null && json["mc_remaining_time"].GetValue<int>() != 0 && !printer.NotifiedOfRemainingTime)
             {
-                TimeSpan remainingTime = TimeSpan.FromSeconds(json["mc_remaining_time"].GetValue<int>());
+                //https://github.com/bambulab/BambuStudio/blob/master/src/slic3r/GUI/DeviceManager.hpp#L616 says "time in seconds" but that's not what I'm seeing in practice
+                TimeSpan remainingTime = TimeSpan.FromMinutes(json["mc_remaining_time"].GetValue<int>());
                 Helpers.EchoMessage($"Estimated time remaining: {remainingTime.Format()}", ConsoleColor.Green, true);
                 printer.NotifiedOfRemainingTime = true;
             }
