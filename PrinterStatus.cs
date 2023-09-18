@@ -10,6 +10,13 @@ namespace BambuLabsListener
         public int ProgressPercentage;
         public int LayerNum;
         public Stopwatch Stopwatch = new Stopwatch(); //The MQTT messages don't seem to contain times, so we'll keep track of our own stopwatch
+        public bool NotifiedOfRemainingTime = false;
+
+        public void MarkPrintAsStarted()
+        {
+            NotifiedOfRemainingTime = false;
+            Stopwatch.Restart();
+        }
 
         //Copied from BambuStudio source code https://github.com/bambulab/BambuStudio/blob/5ef759ce41863f989da7b363f7c94e5edc5ade0d/src/slic3r/GUI/DeviceManager.cpp#L52
         public static string InterpretStage(int stage)

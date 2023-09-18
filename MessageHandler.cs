@@ -89,9 +89,16 @@ namespace BambuLabsListener
                     {
                         //Only start the stopwatch when the "layer_num: 0" message is sent. Otherwise, it seems that a "gcode_state: FINISH" can be sent AFTER
                         //the project_file command is sent (presumably, leftover from the previous print)
-                        printer.Stopwatch.Restart();
+                        printer.MarkPrintAsStarted();
                     }
                 });
+            }
+
+            if (json["mc_remaining_time"] != null && json["mc_remaining_time"].GetValue<int>() != 0 && !printer.NotifiedOfRemainingTime)
+            {
+                TimeSpan remainingTime = TimeSpan.FromSeconds(json["mc_remaining_time"].GetValue<int>());
+                Helpers.EchoMessage($"Estimated time remaining: {remainingTime.Format()}", ConsoleColor.Green, true);
+                printer.NotifiedOfRemainingTime = true;
             }
 
             if (json["mc_percent"] != null)
