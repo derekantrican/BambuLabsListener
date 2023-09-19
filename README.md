@@ -11,7 +11,7 @@ https://github.com/derekantrican/BambuLabsListener/assets/1558019/c08882ff-e89c-
 ## Cross-plat compatibility
 
 - Windows: tested & working
-- OSX: tested & working
+- OSX: tested on an older Macbook - same issues as Linux https://github.com/derekantrican/BambuLabsListener/issues/1. Let me know if you test this
 - Linux: I tried testing on a raspberry pi & had some issues (https://github.com/derekantrican/BambuLabsListener/issues/1). If you try this on Linux, please let me know your findings
 
 ## Getting started
@@ -25,6 +25,11 @@ _For this to work, you need to be on the same network as your printer_
 4. A settings.json file will be created for you. Open it up and populate the values listed
 5. Run `dotnet run` again and the application will start listening to messages from your printer
 6. Start a print! You should be able to watch the console for message updates such as when a print starts, layer progress, and print finishing. Discord notifications will be sent to the webhook specified when a print starts & finishes
+
+## Troubleshooting
+
+As mentioned in https://github.com/derekantrican/BambuLabsListener/issues/3#issuecomment-1714352307 I had some issues getting this to work unless I installed [MQTT Explorer](https://mqtt-explorer.com/) first & got it working listening to my printer's message stream. After that, this tool seemed to work (no idea why that might be).
+
 
 ## Future plans
 
