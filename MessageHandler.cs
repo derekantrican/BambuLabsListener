@@ -113,7 +113,7 @@ namespace BambuLabsListener
                 string errorMessage = PrinterStatus.InterpretErrorCode(errorCode);
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    Helpers.EchoMessage($"'{printer.PrintName}' needs attention: ({errorMessage})", ConsoleColor.Yellow);
+                    Helpers.EchoMessage($"'{printer.PrintName}' needs attention: {errorMessage}", ConsoleColor.Yellow);
                 }
                 else
                 {
