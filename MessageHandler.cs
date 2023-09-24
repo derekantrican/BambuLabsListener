@@ -109,10 +109,16 @@ namespace BambuLabsListener
 
             if (json["print_error"] != null && json["print_error"].GetValue<int>() != 0)
             {
-                //Todo: I would love to interpret the print_error value as a helpful message, but it doesn't look like that even happens in BambuStudio.
-                //  So there's no way of knowing what error code means what
-
-                Helpers.EchoMessage($"'{printer.PrintName}' failed (elapsed: {printer.Stopwatch.Elapsed.Format()}, error: {json["print_error"].GetValue<int>()})", ConsoleColor.Red, true);
+                int errorCode = json["print_error"].GetValue<int>();
+                string errorMessage = PrinterStatus.InterpretErrorCode(errorCode);
+                if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    Helpers.EchoMessage($"'{printer.PrintName}' needs attention: ({errorMessage})", ConsoleColor.Yellow);
+                }
+                else
+                {
+                    Helpers.EchoMessage($"'{printer.PrintName}' encountered an unknown error ({errorCode})", ConsoleColor.Red, true);
+                }
             }
         }
     }

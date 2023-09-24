@@ -21,7 +21,8 @@ namespace BambuLabsListener
         //Copied from BambuStudio source code https://github.com/bambulab/BambuStudio/blob/5ef759ce41863f989da7b363f7c94e5edc5ade0d/src/slic3r/GUI/DeviceManager.cpp#L52
         public static string InterpretStage(int stage)
         {
-            switch(stage) {
+            switch(stage)
+            {
                 case 0:
                     return "Printing";
                 case 1:
@@ -66,6 +67,24 @@ namespace BambuLabsListener
                     return "Paused due to nozzle temperature malfunction";
                 case 21:
                     return "Paused due to heat bed temperature malfunction";
+                default:
+                    return null;
+            }
+        }
+
+        //This mapping doesn't have any basis in BambuStudio code (at least, as far as I can tell) but is determined from testing
+        public static string InterpretErrorCode(int errorCode)
+        {
+            switch (errorCode) //Todo: probably want to tweak the below messages to be closer to what the dialog messages actually say
+            {
+                case 134201347:
+                    return "Pull back current filament";
+                case 134201350:
+                    return "Load new filament";
+                case 134184967:
+                    return "Confirm filament has been extruded";
+                case 50364435:
+                    return "Print is paused (M400)";
                 default:
                     return null;
             }
