@@ -30,7 +30,26 @@ _For this to work, you need to be on the same network as your printer_
 
 As mentioned in https://github.com/derekantrican/BambuLabsListener/issues/3#issuecomment-1714352307 I had some issues getting this to work unless I installed [MQTT Explorer](https://mqtt-explorer.com/) first & got it working listening to my printer's message stream. After that, this tool seemed to work (no idea why that might be).
 
+## Questions/Issues
+
+- For **Questions** (such as "how do I..."), please [open a discussion](https://github.com/derekantrican/BambuLabsListener/discussions)
+- For **Issues** (such as a true bug or feature request), please [open an issue](https://github.com/derekantrican/BambuLabsListener/issues)
+
+## Support/Donate to this project
+
+Thank you so much for considering donating to this project! The more donations I get, the more I can justify putting work into this project.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E5RZJY)
 
 ## Future plans
 
-_Theoretically,_ MQTT could also be used to send (publish) messages TO the printer (eg starting a print job). I haven't tested that and don't know if it works. Regardless, I don't plan on supporting that in the future - this repository is only meant to serve as a small tool & example code for building something similar. But anyone is welcome to fork & create a PR to contribute!
+Todos:
+
+- Get this working "out of the box" on any platform (https://github.com/derekantrican/BambuLabsListener/issues/1, https://github.com/derekantrican/BambuLabsListener/issues/3)
+- Confirm this works with the X1C (https://github.com/derekantrican/BambuLabsListener/issues/2)
+
+#### UI
+_It has been suggested that I turn this into an OctoPrint-like interface. That would be a lot of work (and a lot of learning new things for me), but I can see the value in it. If this gets enough demand and there's enough sponsorship of this project, I'll be able to justify time towards this feature._
+
+#### _Sending_ messages
+_Theoretically,_ MQTT could also be used to send (publish) messages TO the printer (eg starting a print job). I haven't tested that and don't know if it works. I have no plans to do this currently - this repository is only meant to serve as a small tool & example code for building something similar. But anyone is welcome to fork & create a PR to contribute!
