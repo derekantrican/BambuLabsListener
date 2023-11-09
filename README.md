@@ -1,6 +1,9 @@
 # BambuLabsListener
 
-This is a listener & notifier for Bambu Labs printers using MQTT to listen on the messages the printer sends and provide print notifications via Discord
+This is a listener & notifier for Bambu Labs printers using MQTT to listen on the messages the printer sends and provide print notifications via Discord.
+
+### AT THIS TIME, THIS CODE IS ONLY TO SERVE AS AN EXAMPLE - NOT A SOLUTION
+While this works (and is enough for my needs) this is meant to just be a starting point & inspiration for other developers. I don't have the capacity at this time to take on & support another project.
 
 _This has only been tested on a P1P as that's the only printer I have. If you have a X1C and are willing to test this out, please visit https://github.com/derekantrican/BambuLabsListener/issues/2_
 
