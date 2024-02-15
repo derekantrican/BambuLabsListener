@@ -24,6 +24,12 @@ using (var mqttClient = mqttFactory.CreateMqttClient())
 
     await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
+    mqttClient.DisconnectedAsync += async (args) =>
+    {
+        Console.WriteLine($"!!! MQTT Client disconnected !!!");
+        Console.WriteLine($"Reason: {args.ReasonString}");
+    };
+
     var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
         .WithTopicFilter(f =>
         {
