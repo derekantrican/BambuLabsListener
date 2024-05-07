@@ -1,3 +1,14 @@
+# !! - THIS PROJECT HAS BEEN ARCHIVED - !!
+
+This project has been archived as a better option has come along: [OctoEverywhere](https://octoeverywhere.com/) [[GitHub](https://github.com/QuinnDamerell/OctoPrint-OctoEverywhere)] which now supports BambuLabs printers.
+
+I'd rather point people in that direction than use my "example code" that most likely will get very little focus from me with my limited free time.
+
+
+
+
+
+
 # BambuLabsListener
 
 This is a listener & notifier for Bambu Labs printers using MQTT to listen on the messages the printer sends and provide print notifications via Discord.
